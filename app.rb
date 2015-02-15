@@ -17,15 +17,15 @@ class App < Sinatra::Base
   end
 
   def log_to_array(filename, string = nil)
-    file_array = []
+    log_array = []
     File.open(filename, 'r') do |f1|
       while line = f1.gets
         if string.nil? or line.include? string
-          file_array << line
+          log_array << { :line => line }
         end
       end
     end
-    return file_array
+    return log_array.to_json
   end
 
   def log_stats(log_array, string)
@@ -45,7 +45,7 @@ class App < Sinatra::Base
     output = log_to_array(file)
     @error = 'ERROR!'
     puts output.length
-    json(200, output)
+    output
   end
 
   get '/api/v1/log/:logfile/:string/?' do
@@ -53,7 +53,7 @@ class App < Sinatra::Base
     string = params[:string]
     output = log_to_array(file, string)
     puts output.length
-    json(200, output)
+    output
   end
 
   get '/api/v1/logstat/:logfile/:string/?' do
