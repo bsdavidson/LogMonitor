@@ -29,9 +29,18 @@
 </script>
 
 <script type="text/template" id="tmplt-LogLines">
-        <table class="table table-striped">
-        <%% _.each(log.get('lines'), function(line) { %>
-          <tr> <td> <%%= line %></td> </tr>
-        <%% }) %>
-        </table>
+  <%% var currentLine = LR.lastLineCount + 1 %>
+  <%% var lineState = '' %>
+    <table class="table table-striped">
+    <%% _.each(log.get('lines'), function(line) { %>
+      <%% if ((LR.lastLineCount - LR.newLineCount) < currentLine - 1) {
+            lineState = 'success'
+          } else {
+            lineState = ''
+          }
+      %>
+      <%% currentLine-- %>
+      <tr class="<%%=lineState %>"> <td><%%= currentLine %> </td><td> <%%= line %></td> </tr>
+    <%% }) %>
+    </table>
 </script>

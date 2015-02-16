@@ -1,5 +1,16 @@
 // I have no fucking idea what I'm doing...
+
+// Date Shim
+if (!Date.now) {
+    Date.now = function() {
+      return new Date().getTime();
+    };
+  }
+
 var LR = {
+  startTime: Math.floor(Date.now() / 1000),
+  currentTime: Math.floor(Date.now() / 1000),
+  lastLineCount: 0,
   Models: {},
   Collections: {},
   Views: {},
@@ -36,7 +47,7 @@ LR.Views.Logs = Backbone.View.extend({
   template: LR.Templates.logsSelect,
   logTemplate: _.template($("#tmplt-LogLines").html()),
 
-  events: { 'change select': 'updateLog' },
+  events: { 'change select': 'changeLog' },
 
   initialize: function() {
     this.collection.bind('reset', this.render, this);
@@ -49,10 +60,20 @@ LR.Views.Logs = Backbone.View.extend({
       collection: this.collection
     }));
     this.updateLog();
+
+  },
+
+  changeLog: function() {
+    LR.lastLineCount = 0;
+    LR.newLineCount = 0;
+    this.updateLog();
   },
 
   updateLog: function() {
-    console.log('ReRenderLog', this.$el.find('select').val());
+    LR.currentTime = Math.floor(Date.now() / 1000);
+    timeElaspsed = LR.currentTime - LR.startTime;
+
+    //console.log('ReRenderLog', this.$el.find('select').val());
     selectedFile = this.$el.find('select').val();
     searchString = this.$el.find('input').val();
     log = this.collection.get(selectedFile);
@@ -62,6 +83,22 @@ LR.Views.Logs = Backbone.View.extend({
       },
       success: _.bind(function() {
         logArray = log.get('lines');
+        if (LR.lastLineCount === 0) {
+          LR.lastLineCount = logArray.length;
+          console.log('Reset Count');
+        }
+
+        if (LR.lastLineCount < logArray.length) {
+          if ((LR.currentTime - LR.lastNewLineTime) < 20) {
+            LR.newLineCount = LR.newLineCount + (logArray.length - LR.lastLineCount);
+          } else {
+            LR.newLineCount = logArray.length - LR.lastLineCount;
+          }
+
+          LR.lastLineCount = logArray.length;
+          console.log('Count Change!', LR.newLineCount);
+          LR.lastNewLineTime = LR.currentTime;
+        }
         this.$el.find('.logblock').html(this.logTemplate({
           log: log
         }));
@@ -69,16 +106,7 @@ LR.Views.Logs = Backbone.View.extend({
         this.$el.find('#last-line-count').html('# of Matches: ' + logArray.length);
       }, this)
     });
-
   }
-
-  // setModel: function(model) {
-  //   this.model = model;
-  //   if (this.model) {
-  //     this.model.bind('reset', this.render);
-  //   }
-  //   this.render();
-  // }
 });
 
 
