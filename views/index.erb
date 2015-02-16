@@ -1,12 +1,37 @@
-<div class="app_container"></div>
+<div class="logs-view">
+<div class="row">
+  <div class="selectblock col-md-4"></div>
 
-<script type="text/template" id="tmplt-LogEntries">
-    <ul>
-    </ul>
+</div>
+<div class="row">
+  <div class="logblock col-md-12"></div>
+</div>
+<div>
+
+
+
+<script type="text/template" id="tmplt-LogsSelect">
+  <div class="form-group">
+    <div class="row">
+      <label for='log-select' class="control-label">Log Select</label>
+      <select id="log-select" class="form-control">
+      <%% collection.each(function(model) { %>
+        <option value="<%%= model.get('filename') %>" ><%%= model.get('filename') %></option>
+      <%% }) %>
+      </select>
+    </div>
+    <div class="row">
+      <label for="log-search" class="control-label">Search</label>
+      <input id="log-search" class="form-control col-md-4" value="" placeholder="Search String" />
+        <h3 id="last-line-count" class="col-md-8"></h3>
+     </div>
+  </div>
 </script>
 
-<script type="text/template" id="tmplt-LogEntry">
-      *
+<script type="text/template" id="tmplt-LogLines">
+        <table class="table table-striped">
+        <%% _.each(log.get('lines'), function(line) { %>
+          <tr> <td> <%%= line %></td> </tr>
+        <%% }) %>
+        </table>
 </script>
-
-

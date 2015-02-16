@@ -6,67 +6,83 @@ var LR = {
   Templates: {}
 };
 
+// Model
+LR.Models.Log = Backbone.Model.extend({
+  idAttribute: 'filename'
+});
 
-LR.Models.LogEntry = Backbone.Model.extend({});
-
-LR.Collections.LogEntries = Backbone.Collection.extend({
-  model: LR.Models.LogEntry,
-  url: '/api/v1/log/log.txt',
+// Collection
+LR.Collections.Logs = Backbone.Collection.extend({
+  model: LR.Models.Log,
+  url: '/api/v1/logs',
   initialize: function(){
     console.log('Collection Initialized');
   }
 });
 
-LR.Templates.logEntries = _.template($("#tmplt-LogEntries").html());
-LR.Views.LogEntries = Backbone.View.extend({
-  el: $('.app_container'),
-  template: LR.Templates.logEntries,
+// Collection VIEW
+LR.Templates.logsSelect = _.template($("#tmplt-LogsSelect").html());
+
+/*
+log.fetch({
+  data: {
+    filter: 'xxx'
+  }
+});
+*/
+
+LR.Views.Logs = Backbone.View.extend({
+  el: $('.logs-view'),
+  template: LR.Templates.logsSelect,
+  logTemplate: _.template($("#tmplt-LogLines").html()),
+
+  events: { 'change select': 'updateLog' },
 
   initialize: function() {
-    _.bindAll(this, "render", "addAll", "addOne");
-    this.collection.bind("reset", this.render);
+    this.collection.bind('reset', this.render, this);
+    // this.setModel(this.collection.at(0));
   },
 
   render: function() {
-    console.log("Render View!");
-    console.log(this.template());
-    console.log(this.collection.length);
-    //this.el).html(this.template());
-    $(this.el).html(this.collection.length);
-    this.addAll();
+    console.log('Render time!');
+    this.$el.find('.selectblock').html(this.template({
+      collection: this.collection
+    }));
+    this.updateLog();
   },
 
-  addAll: function() {
-    //console.log('addAll');
-    this.collection.each(this.addOne);
-  },
+  updateLog: function() {
+    console.log('ReRenderLog', this.$el.find('select').val());
+    selectedFile = this.$el.find('select').val();
+    searchString = this.$el.find('input').val();
+    log = this.collection.get(selectedFile);
+    log.fetch({
+      data: {
+        filter: searchString
+      },
+      success: _.bind(function() {
+        logArray = log.get('lines');
+        this.$el.find('.logblock').html(this.logTemplate({
+          log: log
+        }));
+        // console.log(logArray);
+        this.$el.find('#last-line-count').html('# of Matches: ' + logArray.length);
+      }, this)
+    });
 
-  addOne: function (model) {
-    //console.log('addOne');
-    view = new LR.Views.LogEntry({ model: model });
-    $('ul', this.el).append(view.render());
-  }
-});
-
-LR.Templates.LogEntry = _.template($('#tmplt-LogEntry').html());
-
-LR.Views.LogEntry = Backbone.View.extend({
-  tagName: 'li',
-  template: LR.Templates.LogEntry,
-
-  initialize: function() {
-    _.bindAll(this, 'render');
-  },
-
-  render: function() {
-    console.log(this.model.get('line'));
-    // console.log("model ");
-    return $(this.el).append(this.template(this.model));
   }
 
+  // setModel: function(model) {
+  //   this.model = model;
+  //   if (this.model) {
+  //     this.model.bind('reset', this.render);
+  //   }
+  //   this.render();
+  // }
 });
 
 
+// Router
 LR.Router = Backbone.Router.extend({
   routes: {
       "": "defaultRoute"
@@ -74,10 +90,16 @@ LR.Router = Backbone.Router.extend({
 
     defaultRoute: function () {
       console.log("defaultRoute");
-      LR.logEntries = new LR.Collections.LogEntries();
-      new LR.Views.LogEntries({ collection: LR.logEntries });
-      LR.logEntries.fetch();
-      console.log(LR.logEntries.length);
+      // LR.logEntries = new LR.Collections.LogEntries();
+      LR.logs = new LR.Collections.Logs();
+      // new LR.Views.LogEntries({ collection: LR.logEntries });
+      LR.logsView = new LR.Views.Logs({ collection: LR.logs });
+      //LR.logEntries.fetch();
+      LR.logs.fetch({
+        success: function() {
+          console.log(LR.logs.length);
+        }
+      });
     }
 });
 
@@ -85,6 +107,6 @@ var appRouter = new LR.Router();
 Backbone.history.start();
 
 setInterval(function(){
-  LR.logEntries.fetch();
-},12000);
+  LR.logsView.updateLog();
+},1000);
 

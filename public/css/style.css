@@ -1,0 +1,15 @@
+html {
+  background: #A3CEE3;
+}
+
+body {
+  background: #A3CEE3;
+}
+
+.logblock {
+  background: #FFF;
+  overflow-y: scroll;
+  max-height: 400px;
+  border: 1px solid #666;
+  box-shadow: 1px 1px 4px #333;
+}
