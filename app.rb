@@ -17,19 +17,25 @@ class App < Sinatra::Base
     end
   end
 
-  def log_to_array(filename, string = nil)
+  def log_to_array(filename, string = nil, seek = 0)
     log_array = []
+    last_file_pos = 0
     File.open(File.join(settings.logs,filename), 'r') do |f1|
+      f1.seek(seek)
       while line = f1.gets
+         last_file_pos = f1.pos
         if string.nil? or line.include? string
           log_array << line
         end
       end
+
     end
 
+    log_array = log_array.reverse
     return {
       filename: filename,
-      lines: log_array.reverse
+      lastfilepos: last_file_pos,
+      lines: log_array[0...1000]
     }
   end
 
@@ -54,8 +60,8 @@ class App < Sinatra::Base
   get '/api/v1/logs/:logfile/?' do
     file = params[:logfile]
     filter = params[:filter]
-    output = log_to_array(file, filter)
-    puts output.length
+    seek = params[:seek].to_i
+    output = log_to_array(file, filter, seek)
     output.to_json
   end
 
