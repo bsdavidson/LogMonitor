@@ -17,15 +17,25 @@ class App < Sinatra::Base
     end
   end
 
-  def log_to_array(filename, string = nil, seek = 0)
+  def log_to_array(filename, string = nil, seekpos = 0)
     log_array = []
     last_file_pos = 0
     File.open(File.join(settings.logs,filename), 'r') do |f1|
-      f1.seek(seek)
+      if seekpos == 0
+        f1.seek(0, IO::SEEK_END)
+        endpos = f1.pos
+        puts "End Pos #{endpos}"
+      end
+
+      if seekpos == 0 and endpos >= 300000
+        f1.seek(-300000, IO::SEEK_END)
+      else
+        f1.seek(seekpos)
+      end
       while line = f1.gets
          last_file_pos = f1.pos
         if string.nil? or line.include? string
-          log_array << line
+          log_array << { time: 0, line: line }
         end
       end
 
@@ -35,7 +45,7 @@ class App < Sinatra::Base
     return {
       filename: filename,
       lastfilepos: last_file_pos,
-      lines: log_array[0...1000]
+      lines: log_array
     }
   end
 
@@ -53,7 +63,6 @@ class App < Sinatra::Base
       puts "#{filename}"
       {filename: filename}
     end
-    puts log_list.inspect
     log_list.to_json
   end
 
@@ -62,6 +71,8 @@ class App < Sinatra::Base
     filter = params[:filter]
     seek = params[:seek].to_i
     output = log_to_array(file, filter, seek)
+    puts output.inspect
+    puts output.to_json.inspect
     output.to_json
   end
 

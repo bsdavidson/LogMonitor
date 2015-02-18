@@ -1,15 +1,67 @@
 html {
-  background: #A3CEE3;
+  background: #fff;
 }
 
 body {
-  background: #A3CEE3;
+  background: #fff;
+}
+
+header {
+  background: #000;
+  color: #efefef;
+  margin-bottom: 1%;
+}
+
+xmp {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  font-size: 12px;
+}
+
+.logs-view {
+  position: fixed;
+  width: 84%;
+  right: 0;
+}
+
+.selectblock {
+  background: #f5f5f5;
+  border-right: 1px solid #ccc;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  top: 70px;
+  width: 217px;
+  padding: 1%;
+
 }
 
 .logblock {
   background: #FFF;
   overflow-y: scroll;
-  max-height: 400px;
-  border: 1px solid #666;
-  box-shadow: 1px 1px 4px #333;
+  border-radius: 4px;
+  box-shadow: 1px 1px 6px #333;
+  padding:0;
+  margin-left: 1%;
+  position: fixed;
+  bottom: 2%;
+  left: 218px;
+  right: 1%;
+  top: 111px;
+
 }
+
+.logblock td {
+  margin:0;
+  padding:0;
+}
+
+#last-line-count {
+  position: relative;
+  top: 10px;
+}
+

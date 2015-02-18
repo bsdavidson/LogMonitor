@@ -1,30 +1,28 @@
 <div class="logs-view">
-<div class="row">
-  <div class="selectblock col-md-4"></div>
-
-</div>
-<div class="row">
-  <div class="logblock col-md-12"></div>
-</div>
+  <div class="row-fluid">
+    <div class="selectblock "></div>
+    <div class="logblock "></div>
+  </div>
 <div>
 
-
-
 <script type="text/template" id="tmplt-LogsSelect">
-  <div class="form-group">
-    <div class="row">
-      <label for='log-select' class="control-label">Log Select</label>
+  <div class="row-fluid">
+    <div class="form-group">
+    <label for='log-select' class="control-label">Log Select</label>
       <select id="log-select" class="form-control">
       <%% collection.each(function(model) { %>
         <option value="<%%= model.get('filename') %>" ><%%= model.get('filename') %></option>
       <%% }) %>
       </select>
     </div>
-    <div class="row">
+  </div>
+
+  <div class="row-fluid">
+    <div class="form-group">
       <label for="log-search" class="control-label">Search</label>
       <input id="log-search" class="form-control col-md-4" value="" placeholder="Search String" />
-        <h3 id="last-line-count" class="col-md-8"></h3>
-     </div>
+        <p id="last-line-count"></p>
+    </div>
   </div>
 </script>
 
@@ -32,7 +30,7 @@
   <%% var currentLine = LR.lastLineCount + 1 %>
   <%% var lineState = '' %>
     <table class="table table-striped">
-    <%% _.each(log.get('lines'), function(line) { %>
+    <%% _.each(log, function(line) { %>
       <%% if ((LR.lastLineCount - LR.newLineCount) < currentLine - 1) {
             lineState = 'success'
           } else {
@@ -40,7 +38,7 @@
           }
       %>
       <%% currentLine-- %>
-      <tr class="<%%=lineState %>"> <td><%%= currentLine %> </td><td> <%%= line %></td> </tr>
+      <tr class="<%%=lineState %>"> <td><%%= currentLine %> </td><td> <xmp> <%%= $.trim(line['line']) %> </xmp></td> </tr>
     <%% }) %>
     </table>
 </script>
