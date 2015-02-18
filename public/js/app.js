@@ -186,5 +186,5 @@ Backbone.history.start();
 
 setInterval(function(){
   LR.logsView.updateLog();
-},63000);
+},2000);
 
