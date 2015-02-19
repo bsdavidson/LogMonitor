@@ -30,8 +30,14 @@ if (!Array.prototype.remove) {
     return removedItems;
   };
 }
-// ex var removedItems = a.remove(2);
-//    a = [1,3,2,4], removedItems = [2];
+
+
+var logCleanup = function() {
+  if (LR.logArray.length > 2000) {
+    var x = LR.logArray.length - 2000;
+    LR.logArray.splice(-1, x);
+  }
+}
 
 var LR = {
   startTime: Math.floor(Date.now() / 1000),
@@ -109,12 +115,10 @@ LR.Views.Logs = Backbone.View.extend({
 
   updateLog: function() {
     LR.currentTime = Math.floor(Date.now() / 1000);
-    timeElaspsed = LR.currentTime - LR.startTime;
-
-    //console.log('ReRenderLog', this.$el.find('select').val());
-    selectedFile = this.$el.find('select').val();
-    //searchString = this.$el.find('input').val();
-    log = this.collection.get(selectedFile);
+    LR.timeElaspsed = LR.currentTime - LR.startTime;
+    LR.selectedFile = this.$el.find('select').val();
+    LR.pauseRefresh = this.$el.find('#pause-refresh').val();
+    var log = this.collection.get(LR.selectedFile);
 
     log.fetch({
 
@@ -138,6 +142,8 @@ LR.Views.Logs = Backbone.View.extend({
           LR.lastLineCount = logLen;
         }
 
+        // The new log Length is greater than what we currently have
+        // therefore, we have new entries.
         if (LR.lastLineCount < logLen) {
           // if less 20 seconds have passed, new lines are added to the
           // existing new lines. otherwise, the new lines are the only
@@ -185,6 +191,10 @@ var appRouter = new LR.Router();
 Backbone.history.start();
 
 setInterval(function(){
-  LR.logsView.updateLog();
-},2000);
+  if ($('input#pause-refresh').is(':checked')) {
+    console.log('Update Paused');
+  } else {
+    LR.logsView.updateLog();
+  }
+},3000);
 
