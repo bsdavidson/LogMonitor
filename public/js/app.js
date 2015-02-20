@@ -11,6 +11,21 @@ Array.prototype.clone = function() {
   return this.slice(0);
 };
 
+var entityMap = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': '&quot;',
+  "'": '&#39;',
+  "/": '&#x2F;'
+};
+
+function escapeHtml(string) {
+  return String(string).replace(/[&<>"'\/]/g, function (s) {
+    return entityMap[s];
+  });
+}
+
 // Function for removing elements from Array
 if (!Array.prototype.remove) {
   Array.prototype.remove = function(val, all) {
@@ -31,17 +46,17 @@ if (!Array.prototype.remove) {
   };
 }
 
-
 var logCleanup = function() {
   if (LR.logArray.length > 2000) {
     var x = LR.logArray.length - 2000;
     LR.logArray.splice(-1, x);
   }
-}
+};
 
 var LR = {
   startTime: Math.floor(Date.now() / 1000),
   currentTime: Math.floor(Date.now() / 1000),
+  functionTimer: 0,
   logArray: [],
   lastLineCount: 0,
   lastFilePos: 0,
@@ -72,6 +87,7 @@ LR.Views.Logs = Backbone.View.extend({
   el: $('.logs-view'),
   template: LR.Templates.logsSelect,
   logTemplate: _.template($("#tmplt-LogLines").html()),
+  logLineTemplate: _.template($("#tmplt-LogLinePrepend").html()),
 
   events: {
     'change select': 'changeLog',
@@ -84,7 +100,6 @@ LR.Views.Logs = Backbone.View.extend({
   },
 
   render: function() {
-    console.log('Render time!');
     this.$el.find('.selectblock').html(this.template({
       collection: this.collection
     }));
@@ -96,6 +111,8 @@ LR.Views.Logs = Backbone.View.extend({
     LR.lastLineCount = 0;
     LR.newLineCount = 0;
     LR.logArray = [];
+    this.$el.find('#log-table').html('');
+    this.$el.find('#loader').show();
     LR.lastFilePos = 0;
   },
 
@@ -105,12 +122,11 @@ LR.Views.Logs = Backbone.View.extend({
   },
 
   searchChange: function() {
+    LR.functionTimer = 1;
     this.resetLog();
     LR.filterText = this.$el.find('input').val();
-    var clonedLog = LR.logArray.clone();
-    LR.filteredLog = clonedLog.remove(LR.filterText, true);
-    console.log('Filtered', LR.filteredLog);
-    console.log(LR.filteredLog.length);
+    // var clonedLog = LR.logArray.clone();
+    // LR.filteredLog = clonedLog.remove(LR.filterText, true);
   },
 
   updateLog: function() {
@@ -120,52 +136,62 @@ LR.Views.Logs = Backbone.View.extend({
     LR.pauseRefresh = this.$el.find('#pause-refresh').val();
     var log = this.collection.get(LR.selectedFile);
 
-    log.fetch({
+    if (LR.functionTimer === 0) {
+      log.fetch({
+        data: {
+          filter: LR.filterText,
+          seek: LR.lastFilePos
+        },
 
-      data: {
-        filter: LR.filterText,
-        seek: LR.lastFilePos
-      },
-
-      success: _.bind(function() {
-
-        // Add new log entries to the top of our existing array
-        LR.logArray.unshift.apply(LR.logArray, log.get('lines'));
-        logLen = LR.logArray.length;
-        // Update our file position only if its higher than before.
-        if (LR.lastFilePos < log.get('lastfilepos')) {
-          LR.lastFilePos = log.get('lastfilepos');
-        }
-        // Setting the count because its the first pass
-        // or because we switched files.
-        if (LR.lastLineCount === 0) {
-          LR.lastLineCount = logLen;
-        }
-
-        // The new log Length is greater than what we currently have
-        // therefore, we have new entries.
-        if (LR.lastLineCount < logLen) {
-          // if less 20 seconds have passed, new lines are added to the
-          // existing new lines. otherwise, the new lines are the only
-          // new line.
-          if ((LR.currentTime - LR.lastNewLineTime) < 20) {
-            LR.newLineCount = LR.newLineCount + (logLen - LR.lastLineCount);
-          } else {
-            LR.newLineCount = logLen - LR.lastLineCount;
+        success: _.bind(function() {
+          // Add new log entries to the top of our existing array
+          LR.logArray.unshift.apply(LR.logArray, log.get('lines'));
+          logLen = LR.logArray.length;
+          // Update our file position only if its higher than before.
+          if (LR.lastFilePos < log.get('lastfilepos')) {
+            LR.lastFilePos = log.get('lastfilepos');
+          }
+          // Setting the count because its the first pass
+          // or because we switched files.
+          if (LR.lastLineCount === 0) {
+            LR.lastLineCount = logLen;
           }
 
-          LR.lastLineCount = logLen;
-          LR.lastNewLineTime = LR.currentTime;
-        }
-        // Write the log out to the Dom
-        this.$el.find('.logblock').html(this.logTemplate({
-          log: LR.logArray
-        }));
+          // The new log Length is greater than what we currently have
+          // therefore, we have new entries.
+          if (LR.lastLineCount < logLen) {
+            // if less 20 seconds have passed, new lines are added to the
+            // existing new lines. otherwise, the new lines are the only
+            // new line.
+            if ((LR.currentTime - LR.lastNewLineTime) < 20) {
+              LR.newLineCount = LR.newLineCount + (logLen - LR.lastLineCount);
+            } else {
+              LR.newLineCount = logLen - LR.lastLineCount;
+            }
 
-        this.$el.find('#last-line-count').html('# of Matches: ' + logLen);
+            LR.lastLineCount = logLen;
+            LR.lastNewLineTime = LR.currentTime;
+          }
+          // Write the log out to the Dom
 
-      }, this)
-    });
+          if (log.get('lines').length > 0) {
+            console.log('New lines');
+            this.$el.find('#log-table').prepend(this.logLineTemplate({
+              log: log.get('lines')
+            }));
+          } else {
+            // this.$el.find('.logblock').html(this.logTemplate({
+            //   log: LR.logArray
+            // }));
+          }
+          this.$el.find('#loader').hide();
+          this.$el.find('#last-line-count').html('# of Matches: ' + log.get('findcount'));
+
+        }, this)
+      });
+    } else {
+      LR.functionTimer = 0;
+    }
   }
 });
 
@@ -196,5 +222,5 @@ setInterval(function(){
   } else {
     LR.logsView.updateLog();
   }
-},3000);
+}, 1000);
 

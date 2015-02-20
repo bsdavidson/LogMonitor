@@ -1,9 +1,13 @@
 <div class="logs-view">
   <div class="row-fluid">
     <div class="selectblock "></div>
-    <div class="logblock "></div>
+    <div class="logblock">
+      <div id="loader"><img src='/images/ajax-loader.gif' /><p>One Sec...</p></div>
+      <table class="table"><tbody id="log-table"></tbody></table>
+    </div>
   </div>
-<div>
+</div>
+
 
 <script type="text/template" id="tmplt-LogsSelect">
   <div class="row-fluid">
@@ -51,8 +55,35 @@
       <%% currentLine-- %>
       <tr class="<%%=lineState %>">
         <td><%%= currentLine %></td>
-        <td><xmp><%%= $.trim(line['line']) %></xmp></td>
+        <td><pre><%%= $.trim(line['line']) %></pre></td>
       </tr>
     <%% }) %>
     </table>
 </script>
+
+<script type="text/template" id="tmplt-LogLinePrepend">
+  <%% var currentLine = LR.lastLineCount + 1 %>
+  <%% var lineState = '' %>
+  <%% var filter = LR.filterText %>
+    <%% _.each(log, function(line) { %>
+      <%% var lineFormatted = $.trim(line['line']) %>
+      <%% lineFormatted = escapeHtml(lineFormatted) %>
+      <%% if (filter) { %>
+        <%% lineFormatted = lineFormatted.split(filter).join('<span class="highlight">' + filter + '</span>') %>
+      <%% } %>
+      <%% if ((LR.lastLineCount - LR.newLineCount) < currentLine - 1) {
+            lineState = 'success'
+          } else {
+            lineState = ''
+          }
+      %>
+      <%% currentLine-- %>
+      <tr class="<%%=lineState %> <%%=line['match'] %> <%%=line['even_odd'] %>">
+        <td><%%= currentLine %></td>
+        <td><pre><%%= lineFormatted %></pre></td>
+      </tr>
+    <%% }) %>
+</script>
+
+
+
