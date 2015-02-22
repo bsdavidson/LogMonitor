@@ -15,7 +15,8 @@
     <label for='log-select' class="control-label">Log Select</label>
       <select id="log-select" class="form-control">
       <%% collection.each(function(model) { %>
-        <option value="<%%= model.get('filename') %>" ><%%= model.get('filename') %></option>
+        <option value="<%%= model.get('filename') %>" >
+        <%%= model.get('filename') %></option>
       <%% }) %>
       </select>
     </div>
@@ -23,8 +24,8 @@
 
   <div class="row-fluid">
     <div class="form-group">
-      <label for="log-search" class="control-label">Filter</label>
-      <input id="log-search" class="form-control col-md-4" value="" placeholder="Filter String" />
+      <label for="log-filter" class="control-label">Filter</label>
+      <input id="log-filter" class="form-control col-md-4" value="" placeholder="Filter String" />
         <p id="last-line-count"></p>
     </div>
   </div>
@@ -40,12 +41,12 @@
   </div>
 </script>
 
-
-<script type="text/template" id="tmplt-LogLines">
+<script type="text/template" id="tmplt-LogLinePrepend">
   <%% var currentLine = LR.lastLineCount + 1 %>
   <%% var lineState = '' %>
-    <table class="table table-striped">
     <%% _.each(log, function(line) { %>
+      <%% var lineFormatted = $.trim(line['line']) %>
+      <%% lineFormatted = escapeHtml(lineFormatted) %>
       <%% if ((LR.lastLineCount - LR.newLineCount) < currentLine - 1) {
             lineState = 'success'
           } else {
@@ -54,31 +55,6 @@
       %>
       <%% currentLine-- %>
       <tr class="<%%=lineState %>">
-        <td><%%= currentLine %></td>
-        <td><pre><%%= $.trim(line['line']) %></pre></td>
-      </tr>
-    <%% }) %>
-    </table>
-</script>
-
-<script type="text/template" id="tmplt-LogLinePrepend">
-  <%% var currentLine = LR.lastLineCount + 1 %>
-  <%% var lineState = '' %>
-  <%% var filter = LR.filterText %>
-    <%% _.each(log, function(line) { %>
-      <%% var lineFormatted = $.trim(line['line']) %>
-      <%% lineFormatted = escapeHtml(lineFormatted) %>
-      <%% if (filter) { %>
-        <%% lineFormatted = lineFormatted.split(filter).join('<span class="highlight">' + filter + '</span>') %>
-      <%% } %>
-      <%% if ((LR.lastLineCount - LR.newLineCount) < currentLine - 1) {
-            lineState = 'success'
-          } else {
-            lineState = ''
-          }
-      %>
-      <%% currentLine-- %>
-      <tr class="<%%=lineState %> <%%=line['match'] %> <%%=line['even_odd'] %>">
         <td><%%= currentLine %></td>
         <td><pre><%%= lineFormatted %></pre></td>
       </tr>

@@ -53,11 +53,11 @@ class App < Sinatra::Base
         s = string_status(string, line)
         if s == 'yes'
           find_count = find_count + 1
-            if find_count.even?
-              even_odd = 'even'
-            else
-              even_odd = 'odd'
-            end
+          if find_count.even?
+            even_odd = 'even'
+          else
+            even_odd = 'odd'
+          end
         end
         log_array << { even_odd: even_odd , match: s, line: line }
       end

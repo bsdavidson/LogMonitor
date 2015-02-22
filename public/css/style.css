@@ -28,6 +28,18 @@ pre {
   right: 0;
 }
 
+.hide {
+  display: none;
+}
+
+.filtered tr {
+  display: none;
+}
+
+.filtered tr.unhide {
+  display: block;
+}
+
 .selectblock {
   background: #f5f5f5;
   border-right: 1px solid #ccc;

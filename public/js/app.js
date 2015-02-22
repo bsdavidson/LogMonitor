@@ -1,5 +1,3 @@
-// I have no fucking idea what I'm doing...
-
 // Date Shim
 if (!Date.now) {
   Date.now = function() {
@@ -33,7 +31,7 @@ if (!Array.prototype.remove) {
     if (all) {
       for(i = this.length; i--;){
         if (this[i].indexOf(val) > -1) {
-          console.log('Removing Item');
+          // console.log('Removing Item');
           removedItems.push(this.splice(i, 1));
         }
       }
@@ -60,6 +58,7 @@ var LR = {
   logArray: [],
   lastLineCount: 0,
   lastFilePos: 0,
+  lineMatchCount: 0,
   Models: {},
   Collections: {},
   Views: {},
@@ -86,12 +85,11 @@ LR.Templates.logsSelect = _.template($("#tmplt-LogsSelect").html());
 LR.Views.Logs = Backbone.View.extend({
   el: $('.logs-view'),
   template: LR.Templates.logsSelect,
-  logTemplate: _.template($("#tmplt-LogLines").html()),
   logLineTemplate: _.template($("#tmplt-LogLinePrepend").html()),
 
   events: {
     'change select': 'changeLog',
-    'keyup #log-search': 'searchChange'
+    'keyup #log-filter': 'filterChange'
    },
 
   initialize: function() {
@@ -104,15 +102,14 @@ LR.Views.Logs = Backbone.View.extend({
       collection: this.collection
     }));
     this.updateLog();
-
   },
 
   resetLog: function() {
+    this.$el.find('#log-table').html('');
+    this.$el.find('#loader').show();
     LR.lastLineCount = 0;
     LR.newLineCount = 0;
     LR.logArray = [];
-    this.$el.find('#log-table').html('');
-    this.$el.find('#loader').show();
     LR.lastFilePos = 0;
   },
 
@@ -121,12 +118,17 @@ LR.Views.Logs = Backbone.View.extend({
     this.updateLog();
   },
 
-  searchChange: function() {
+  filterChange: function() {
     LR.functionTimer = 1;
-    this.resetLog();
+    $(this.el).removeHighlight();
     LR.filterText = this.$el.find('input').val();
-    // var clonedLog = LR.logArray.clone();
-    // LR.filteredLog = clonedLog.remove(LR.filterText, true);
+    $('pre').highlight(LR.filterText);
+    if (LR.filterText) {
+      $('#log-table').addClass('filtered');
+    } else {
+      $('#log-table').removeClass('filtered');
+    }
+    LR.lineMatchCount = $('.unhide').length;
   },
 
   updateLog: function() {
@@ -134,12 +136,12 @@ LR.Views.Logs = Backbone.View.extend({
     LR.timeElaspsed = LR.currentTime - LR.startTime;
     LR.selectedFile = this.$el.find('select').val();
     LR.pauseRefresh = this.$el.find('#pause-refresh').val();
+    LR.lineMatchCount = $('.unhide').length;
     var log = this.collection.get(LR.selectedFile);
-
     if (LR.functionTimer === 0) {
       log.fetch({
         data: {
-          filter: LR.filterText,
+          // filter: LR.filterText,
           seek: LR.lastFilePos
         },
 
@@ -179,13 +181,11 @@ LR.Views.Logs = Backbone.View.extend({
             this.$el.find('#log-table').prepend(this.logLineTemplate({
               log: log.get('lines')
             }));
-          } else {
-            // this.$el.find('.logblock').html(this.logTemplate({
-            //   log: LR.logArray
-            // }));
           }
           this.$el.find('#loader').hide();
-          this.$el.find('#last-line-count').html('# of Matches: ' + log.get('findcount'));
+          this.$el.find('#last-line-count').html('# of Matches: ' + LR.lineMatchCount);
+          $(this.el).removeHighlight();
+          $('pre').highlight(LR.filterText);
 
         }, this)
       });
@@ -223,4 +223,3 @@ setInterval(function(){
     LR.logsView.updateLog();
   }
 }, 1000);
-
