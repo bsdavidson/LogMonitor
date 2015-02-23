@@ -31,7 +31,7 @@ jQuery.fn.highlight = function(pat) {
     skip = 1;
     // Added to for unhiding Table row
     var parentTR = node.parentNode.parentNode.parentNode;
-    parentTR.className = 'unhide';
+    $(parentTR).addClass('unhide');
     // console.log(parent);
    }
   }

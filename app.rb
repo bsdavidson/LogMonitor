@@ -24,7 +24,7 @@ class App < Sinatra::Base
       file.seek(0, IO::SEEK_END)
       endpos = file.pos
     end
-    # If new file request is bigger than 500K, set starting position.
+    # If new file request is bigger than 300K, set starting position.
     if seekpos == 0 && endpos >= 300_000
       file.seek(-300_000, IO::SEEK_END)
       seekpos = file.pos
@@ -34,11 +34,11 @@ class App < Sinatra::Base
 
   def string_status(string, line)
     if string.nil?
-        'nil'
+      'nil'
     elsif line.include? string
-        'yes'
+      'yes'
     else
-        'no'
+      'no'
     end
   end
 
@@ -48,18 +48,11 @@ class App < Sinatra::Base
     find_count = 0
     File.open(File.join(settings.logs, filename), 'r') do |f1|
       f1.pos = get_seek_pos(f1, seekpos)
-      while line = f1.gets
+      while (line = f1.gets)
         last_file_pos = f1.pos
         s = string_status(string, line)
-        if s == 'yes'
-          find_count = find_count + 1
-          if find_count.even?
-            even_odd = 'even'
-          else
-            even_odd = 'odd'
-          end
-        end
-        log_array << { even_odd: even_odd , match: s, line: line }
+        find_count += 1 if s == 'yes'
+        log_array << { match: s, line: line }
       end
     end
 
