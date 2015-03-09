@@ -25,8 +25,8 @@ class App < Sinatra::Base
       endpos = file.pos
     end
     # If new file request is bigger than 300K, set starting position.
-    if seekpos == 0 && endpos >= 300_000
-      file.seek(-300_000, IO::SEEK_END)
+    if seekpos == 0 && endpos >= 5_000_000
+      file.seek(-5_000_000, IO::SEEK_END)
       seekpos = file.pos
     end
     seekpos

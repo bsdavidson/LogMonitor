@@ -3,7 +3,7 @@
     <div class="selectblock "></div>
     <div class="logblock">
       <div id="loader"><img src='/images/ajax-loader.gif' /><p>One Sec...</p></div>
-      <table class="table"><tbody id="log-table"></tbody></table>
+      <div id="table-block"></div>
     </div>
   </div>
 </div>
@@ -44,9 +44,10 @@
 <script type="text/template" id="tmplt-LogLinePrepend">
   <%% var currentLine = LR.lastLineCount + 1 %>
   <%% var lineState = '' %>
+    <table class="table"><tbody id="log-table">
     <%% _.each(log, function(line) { %>
       <%% var lineFormatted = $.trim(line['line']) %>
-      <%% lineFormatted = escapeHtml(lineFormatted) %>
+      <%% lineFormatted = LR.escapeHtml(lineFormatted) %>
       <%% if ((LR.lastLineCount - LR.newLineCount) < currentLine - 1) {
             lineState = 'success'
           } else {
@@ -59,6 +60,7 @@
         <td><pre><%%= lineFormatted %></pre></td>
       </tr>
     <%% }) %>
+    </tbody></table>
 </script>
 
 
