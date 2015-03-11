@@ -20,16 +20,21 @@ class App < Sinatra::Base
 
   def get_seek_pos(file, seekpos)
     # New request, get ending position
-    # if seekpos == 0
-    #   file.seek(0, IO::SEEK_END)
-    #   endpos = file.pos
-    # end
-    # If new file request is bigger than 300K, set starting position.
-    # if seekpos == 0 && endpos >= 9_000_000
-    #   file.seek(-9_000_000, IO::SEEK_END)
-    #   seekpos = file.pos
-    # end
-    seekpos
+
+    file.seek(0, IO::SEEK_END)
+    endpos = file.pos
+    bytes_left = endpos - seekpos
+
+    # If new file request is bigger than 250K, set starting position.
+    if bytes_left > 500_000
+      segments = (bytes_left / 500_000) + 1
+    else
+      segments = 0
+    end
+    {
+      seekpos: seekpos,
+      segments_left: segments
+    }
   end
 
   def string_status(string, line)
@@ -46,13 +51,18 @@ class App < Sinatra::Base
     log_array = []
     last_file_pos = 0
     line_count = lastline
+    seek_data = {}
     File.open(File.join(settings.logs, filename), 'r') do |f1|
-      f1.pos = get_seek_pos(f1, seekpos)
+      seek_data = get_seek_pos(f1, seekpos)
+      f1.pos = seekpos
+      bytes_to_read = 500_000
       while (line = f1.gets)
+        break if bytes_to_read <= (f1.pos - seekpos)
         last_file_pos = f1.pos
         # s = string_status(string, line)
         line_count += 1
         log_array << { lineno: line_count, line: line }
+
       end
     end
 
@@ -60,6 +70,7 @@ class App < Sinatra::Base
     {
       filename: filename,
       lastfilepos: last_file_pos,
+      segments: seek_data[:segments_left],
       lines: log_array,
       linecount: line_count
     }

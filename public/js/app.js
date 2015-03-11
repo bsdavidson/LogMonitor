@@ -83,9 +83,9 @@ LR.Views.Logs = Backbone.View.extend({
     LR.filterText = this.$el.find('input').val();
     $('pre').highlight(LR.filterText);
     if (LR.filterText) {
-      $('#log-table').addClass('filtered');
+      $('#table-block').addClass('filtered');
     } else {
-      $('#log-table').removeClass('filtered');
+      $('#table-block').removeClass('filtered');
     }
     LR.lineMatchCount = $('.unhide').length;
   },
@@ -122,6 +122,7 @@ LR.Views.Logs = Backbone.View.extend({
   updateOffsets: function(log) {
     var logLen = LR.logArray.length;
     LR.lastLineNum = log.get('linecount');
+    LR.segmentsLeft = log.get('segments');
     // Update our file position only if its higher than before.
     if (LR.lastFilePos < log.get('lastfilepos')) {
       LR.lastFilePos = log.get('lastfilepos');
@@ -148,6 +149,7 @@ LR.Views.Logs = Backbone.View.extend({
 
   updateViews: function() {
     // Write the log out to the Dom
+
     if (LR.newLines.length > 0 || LR.filterNewEntry) {
       this.$el.find('#table-block').html(
         this.logLineTemplate({
@@ -160,7 +162,8 @@ LR.Views.Logs = Backbone.View.extend({
       this.$el.find('#log-table').append('<tr id="tailspace"><td></td></tr>');
       LR.filterNewEntry = 0;
     }
-    // this.$el.find('#loader').hide();
+
+    this.$el.find('#loader').hide();
     this.$el.find('#last-line-count').html('# of Matches: ' + LR.lineMatchCount);
     $(this.el).removeHighlight();
     $('pre').highlight(LR.filterText);
@@ -190,9 +193,10 @@ LR.Views.Logs = Backbone.View.extend({
           this.updateArrays(log);
           this.updateOffsets(log);
           this.updateViews();
-
           LR.fetchingLogs = false;
-
+          if (LR.segmentsLeft > 0) {
+            LR.logsView.updateLog();
+          }
         }, this)
       });
     } else {
@@ -228,6 +232,6 @@ setInterval(function(){
   } else {
     LR.logsView.updateLog();
   }
-}, 500);
+}, 1000);
 
 }(window.LR));
