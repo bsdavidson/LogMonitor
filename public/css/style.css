@@ -67,9 +67,10 @@ pre {
 }
 
 #loader {
-  position: relative;
+  position: absolute;
   left:47%;
   top: 200px;
+  z-index: 999;
 }
 
 tr.no {

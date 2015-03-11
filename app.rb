@@ -20,15 +20,15 @@ class App < Sinatra::Base
 
   def get_seek_pos(file, seekpos)
     # New request, get ending position
-    if seekpos == 0
-      file.seek(0, IO::SEEK_END)
-      endpos = file.pos
-    end
+    # if seekpos == 0
+    #   file.seek(0, IO::SEEK_END)
+    #   endpos = file.pos
+    # end
     # If new file request is bigger than 300K, set starting position.
-    if seekpos == 0 && endpos >= 5_000_000
-      file.seek(-5_000_000, IO::SEEK_END)
-      seekpos = file.pos
-    end
+    # if seekpos == 0 && endpos >= 9_000_000
+    #   file.seek(-9_000_000, IO::SEEK_END)
+    #   seekpos = file.pos
+    # end
     seekpos
   end
 
@@ -42,17 +42,17 @@ class App < Sinatra::Base
     end
   end
 
-  def log_to_array(filename, string = nil, seekpos = 0)
+  def log_to_array(filename, lastline = 0, seekpos = 0)
     log_array = []
     last_file_pos = 0
-    find_count = 0
+    line_count = lastline
     File.open(File.join(settings.logs, filename), 'r') do |f1|
       f1.pos = get_seek_pos(f1, seekpos)
       while (line = f1.gets)
         last_file_pos = f1.pos
-        s = string_status(string, line)
-        find_count += 1 if s == 'yes'
-        log_array << { match: s, line: line }
+        # s = string_status(string, line)
+        line_count += 1
+        log_array << { lineno: line_count, line: line }
       end
     end
 
@@ -60,9 +60,8 @@ class App < Sinatra::Base
     {
       filename: filename,
       lastfilepos: last_file_pos,
-      filterString: string,
       lines: log_array,
-      findcount: find_count
+      linecount: line_count
     }
   end
 
@@ -80,9 +79,9 @@ class App < Sinatra::Base
 
   get '/api/v1/logs/:logfile/?' do
     file = params[:logfile]
-    filter = params[:filter]
+    lastline = params[:lastline].to_i
     seek = params[:seek].to_i
-    output = log_to_array(file, filter, seek)
+    output = log_to_array(file, lastline, seek)
     output.to_json
   end
 end

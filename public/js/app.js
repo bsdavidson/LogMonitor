@@ -66,6 +66,7 @@ LR.Views.Logs = Backbone.View.extend({
     LR.activeLogArray = [];
     LR.tailLogArray = [];
     LR.lastFilePos = 0;
+    LR.lastLineNum = 0;
   },
 
   changeLog: function() {
@@ -89,25 +90,26 @@ LR.Views.Logs = Backbone.View.extend({
     LR.lineMatchCount = $('.unhide').length;
   },
 
-
-
   updateArrays: function(log) {
      // Add new log entries to the top of our existing array
     LR.newLines = log.get('lines');
-
     LR.logArray.unshift.apply(LR.logArray, LR.newLines);
 
     if (LR.newLines.length > 0 || LR.filterNewEntry) {
       if (LR.filterNewEntry) {
         LR.scratchArray = [];
-
+        var idxCount = 0;
+        console.log('Iterating over ', LR.logArray.length);
+        this.$el.find('#loader').show();
         for (var i = 0, y = LR.logArray.length; i < y; i++) {
           var idx = LR.logArray[i]['line'].search(LR.filterText);
           if (idx > -1) {
-            LR.scratchArray.unshift(LR.logArray[i]);
+            LR.scratchArray.push(LR.logArray[i]);
+            idxCount++;
           }
         }
-
+        this.$el.find('#loader').hide();
+        console.log('idxCount', idxCount);
       } else {
         LR.scratchArray.unshift.apply(LR.scratchArray, LR.newLines);
       }
@@ -115,87 +117,81 @@ LR.Views.Logs = Backbone.View.extend({
 
     LR.activeLogArray = LR.scratchArray.slice(0,200);
     LR.tailLogArray = LR.scratchArray.slice(201);
-    console.log('Scratch', LR.scratchArray.length);
-    console.log(LR.activeLogArray.length, LR.tailLogArray.length);
   },
 
-  updateOffsets: function() {
+  updateOffsets: function(log) {
+    var logLen = LR.logArray.length;
+    LR.lastLineNum = log.get('linecount');
+    // Update our file position only if its higher than before.
+    if (LR.lastFilePos < log.get('lastfilepos')) {
+      LR.lastFilePos = log.get('lastfilepos');
+    }
+    // Setting the count because its the first pass or because we switched files.
+    if (LR.lastLineCount === 0) {
+      LR.lastLineCount = logLen;
+    }
 
+    // The new log Length is greater than what we currently have therefore, we have new entries.
+    if (LR.lastLineCount < logLen) {
+      // if less 20 seconds have passed, new lines are added to the
+      // existing new lines. otherwise, the new lines are the only
+      // new line.
+      if ((LR.currentTime - LR.lastNewLineTime) < 20) {
+        LR.newLineCount = LR.newLineCount + (logLen - LR.lastLineCount);
+      } else {
+        LR.newLineCount = logLen - LR.lastLineCount;
+      }
+      LR.lastLineCount = logLen;
+      LR.lastNewLineTime = LR.currentTime;
+    }
   },
 
-  updateView: function() {
-
+  updateViews: function() {
+    // Write the log out to the Dom
+    if (LR.newLines.length > 0 || LR.filterNewEntry) {
+      this.$el.find('#table-block').html(
+        this.logLineTemplate({
+          LR: LR,
+          log: LR.activeLogArray
+      }));
+      this.$el.find('#headspace').remove();
+      this.$el.find('#tailspace').remove();
+      this.$el.find('#log-table').prepend('<tr id="headspace"><td></td></tr>');
+      this.$el.find('#log-table').append('<tr id="tailspace"><td></td></tr>');
+      LR.filterNewEntry = 0;
+    }
+    // this.$el.find('#loader').hide();
+    this.$el.find('#last-line-count').html('# of Matches: ' + LR.lineMatchCount);
+    $(this.el).removeHighlight();
+    $('pre').highlight(LR.filterText);
   },
-
 
   updateLog: function() {
+    if (LR.fetchingLogs) {
+      return;
+    }
     LR.currentTime = Math.floor(Date.now() / 1000);
     LR.timeElaspsed = LR.currentTime - LR.startTime;
     LR.selectedFile = this.$el.find('select').val();
     LR.pauseRefresh = this.$el.find('#pause-refresh').val();
     LR.lineMatchCount = $('.unhide').length;
+
     var log = this.collection.get(LR.selectedFile);
     if (LR.functionTimer === 0) {
+      LR.fetchingLogs = true;
       log.fetch({
         data: {
-          // filter: LR.filterText,
-          seek: LR.lastFilePos
+          lastline: LR.lastLineNum,
+          seek: LR.lastFilePos,
         },
-
         success: _.bind(function() {
-
-          var logLen = LR.logArray.length;
           // TODO: protect against race conditions
+
           this.updateArrays(log);
-          // updateOffsets();
-          // updateViews();
+          this.updateOffsets(log);
+          this.updateViews();
 
-
-
-
-          // Update our file position only if its higher than before.
-          if (LR.lastFilePos < log.get('lastfilepos')) {
-            LR.lastFilePos = log.get('lastfilepos');
-          }
-          // Setting the count because its the first pass
-          // or because we switched files.
-          if (LR.lastLineCount === 0) {
-            LR.lastLineCount = logLen;
-          }
-
-          // The new log Length is greater than what we currently have
-          // therefore, we have new entries.
-          if (LR.lastLineCount < logLen) {
-            // if less 20 seconds have passed, new lines are added to the
-            // existing new lines. otherwise, the new lines are the only
-            // new line.
-            if ((LR.currentTime - LR.lastNewLineTime) < 20) {
-              LR.newLineCount = LR.newLineCount + (logLen - LR.lastLineCount);
-            } else {
-              LR.newLineCount = logLen - LR.lastLineCount;
-            }
-
-            LR.lastLineCount = logLen;
-            LR.lastNewLineTime = LR.currentTime;
-          }
-          // Write the log out to the Dom
-          if (LR.newLines.length > 0 || LR.filterNewEntry) {
-            this.$el.find('#table-block').html(
-              this.logLineTemplate({
-                LR: LR,
-                log: LR.activeLogArray
-            }));
-            this.$el.find('#headspace').remove();
-            this.$el.find('#tailspace').remove();
-            this.$el.find('#log-table').prepend('<tr id="headspace"><td></td></tr>');
-            this.$el.find('#log-table').append('<tr id="tailspace"><td></td></tr>');
-            LR.filterNewEntry = 0;
-
-          }
-          this.$el.find('#loader').hide();
-          this.$el.find('#last-line-count').html('# of Matches: ' + LR.lineMatchCount);
-          $(this.el).removeHighlight();
-          $('pre').highlight(LR.filterText);
+          LR.fetchingLogs = false;
 
         }, this)
       });
@@ -232,6 +228,6 @@ setInterval(function(){
   } else {
     LR.logsView.updateLog();
   }
-}, 3000);
+}, 500);
 
 }(window.LR));

@@ -56,7 +56,7 @@
       %>
       <%% currentLine-- %>
       <tr class="<%%=lineState %>">
-        <td><%%= currentLine %></td>
+        <td><%%= line['lineno'] %></td>
         <td><pre><%%= lineFormatted %></pre></td>
       </tr>
     <%% }) %>
