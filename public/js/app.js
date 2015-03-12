@@ -116,7 +116,7 @@ LR.Views.Logs = Backbone.View.extend({
     }
 
     LR.activeLogArray = LR.scratchArray.slice(0,200);
-    LR.tailLogArray = LR.scratchArray.slice(201);
+    // LR.tailLogArray = LR.scratchArray.slice(201);
   },
 
   updateOffsets: function(log) {
