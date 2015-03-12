@@ -10,6 +10,7 @@ class App < Sinatra::Base
   set :logs, ::File.join(::File.expand_path(::File.dirname(__FILE__)), '/logs')
   set :public_folder, ::File.join(
     ::File.expand_path(::File.dirname(__FILE__)), '/public')
+  set :buffer, 250_000
 
   helpers do
     def json(code, response)
@@ -26,8 +27,8 @@ class App < Sinatra::Base
     bytes_left = endpos - seekpos
 
     # If new file request is bigger than 250K, set starting position.
-    if bytes_left > 500_000
-      segments = (bytes_left / 500_000) + 1
+    if bytes_left > settings.buffer
+      segments = (bytes_left / settings.buffer) + 1
     else
       segments = 0
     end
@@ -55,7 +56,7 @@ class App < Sinatra::Base
     File.open(File.join(settings.logs, filename), 'r') do |f1|
       seek_data = get_seek_pos(f1, seekpos)
       f1.pos = seekpos
-      bytes_to_read = 500_000
+      bytes_to_read = settings.buffer
       while (line = f1.gets)
         break if bytes_to_read <= (f1.pos - seekpos)
         last_file_pos = f1.pos
