@@ -62,9 +62,8 @@ LR.Views.Logs = Backbone.View.extend({
     LR.lastLineCount = 0;
     LR.newLineCount = 0;
     LR.logArray = [];
-    LR.scratchArray = [];
+    LR.filterArray = [];
     LR.activeLogArray = [];
-    LR.tailLogArray = [];
     LR.lastFilePos = 0;
     LR.lastLineNum = 0;
   },
@@ -79,7 +78,6 @@ LR.Views.Logs = Backbone.View.extend({
     LR.functionTimer = 1;
     $(this.el).removeHighlight();
     LR.activeLogArray = [];
-    LR.tailLogArray = [];
     LR.filterText = this.$el.find('input').val();
     $('pre').highlight(LR.filterText);
     if (LR.filterText) {
@@ -87,7 +85,7 @@ LR.Views.Logs = Backbone.View.extend({
     } else {
       $('#table-block').removeClass('filtered');
     }
-    LR.lineMatchCount = $('.unhide').length;
+    LR.lineMatchCount = LR.filterArray.length;
   },
 
   updateArrays: function(log) {
@@ -95,28 +93,44 @@ LR.Views.Logs = Backbone.View.extend({
     LR.newLines = log.get('lines');
     LR.logArray.unshift.apply(LR.logArray, LR.newLines);
 
-    if (LR.newLines.length > 0 || LR.filterNewEntry) {
-      if (LR.filterNewEntry) {
-        LR.scratchArray = [];
-        var idxCount = 0;
-        console.log('Iterating over ', LR.logArray.length);
-        this.$el.find('#loader').show();
-        for (var i = 0, y = LR.logArray.length; i < y; i++) {
-          var idx = LR.logArray[i]['line'].search(LR.filterText);
-          if (idx > -1) {
-            LR.scratchArray.push(LR.logArray[i]);
-            idxCount++;
-          }
+    if (LR.newLines.length === 0 && !LR.filterNewEntry) {
+      console.log('Nothing to do');
+      return;
+    }
+
+    if (LR.filterNewEntry) {
+      LR.filterArray = [];
+      var idxCount = 0;
+
+      console.log('Iterating over ', LR.logArray.length);
+      this.$el.find('#loader').show();
+
+      for (var i = 0, y = LR.logArray.length; i < y; i++) {
+        var idx = LR.logArray[i]['line'].search(LR.filterText);
+        if (idx > -1) {
+          LR.filterArray.push(i);
+          idxCount++;
         }
-        this.$el.find('#loader').hide();
-        console.log('idxCount', idxCount);
-      } else {
-        LR.scratchArray.unshift.apply(LR.scratchArray, LR.newLines);
+      }
+
+      for (var j = 0, z = LR.filterArray.length; j < z; j++) {
+          console.log('pushing filtered lines');
+          if (j > 200) {
+            return;
+          }
+          var filteredLine = LR.logArray[LR.filterArray[j]];
+          LR.activeLogArray.push(filteredLine);
+      }
+
+    } else {
+
+      if (LR.newLines.length > 0) {
+        console.log('No New FIlter');
+        LR.activeLogArray = LR.logArray.slice(0,200);
       }
     }
 
-    LR.activeLogArray = LR.scratchArray.slice(0,200);
-    // LR.tailLogArray = LR.scratchArray.slice(201);
+
   },
 
   updateOffsets: function(log) {
@@ -126,14 +140,16 @@ LR.Views.Logs = Backbone.View.extend({
     // Update our file position only if its higher than before.
     if (LR.lastFilePos < log.get('lastfilepos')) {
       LR.lastFilePos = log.get('lastfilepos');
+      LR.newLinesPresent = true;
+    } else {
+      LR.newLinesPresent = false;
     }
     // Setting the count because its the first pass or because we switched files.
     if (LR.lastLineCount === 0) {
       LR.lastLineCount = logLen;
     }
 
-    // The new log Length is greater than what we currently have therefore, we have new entries.
-    if (LR.lastLineCount < logLen) {
+    if (LR.newLinesPresent)  {
       // if less 20 seconds have passed, new lines are added to the
       // existing new lines. otherwise, the new lines are the only
       // new line.
@@ -160,13 +176,16 @@ LR.Views.Logs = Backbone.View.extend({
       this.$el.find('#tailspace').remove();
       this.$el.find('#log-table').prepend('<tr id="headspace"><td></td></tr>');
       this.$el.find('#log-table').append('<tr id="tailspace"><td></td></tr>');
+    }
+    this.$el.find('#loader').hide();
+
+    if (LR.filterNewEntry || LR.newLinesPresent) {
+      console.log('updating highlights');
+      $(this.el).removeHighlight();
+      $('pre').highlight(LR.filterText);
       LR.filterNewEntry = 0;
     }
-
-    this.$el.find('#loader').hide();
     this.$el.find('#last-line-count').html('# of Matches: ' + LR.lineMatchCount);
-    $(this.el).removeHighlight();
-    $('pre').highlight(LR.filterText);
   },
 
   updateLog: function() {
@@ -177,7 +196,7 @@ LR.Views.Logs = Backbone.View.extend({
     LR.timeElaspsed = LR.currentTime - LR.startTime;
     LR.selectedFile = this.$el.find('select').val();
     LR.pauseRefresh = this.$el.find('#pause-refresh').val();
-    LR.lineMatchCount = $('.unhide').length;
+    LR.lineMatchCount = LR.filterArray.length;
 
     var log = this.collection.get(LR.selectedFile);
     if (LR.functionTimer === 0) {

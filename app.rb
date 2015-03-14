@@ -10,7 +10,7 @@ class App < Sinatra::Base
   set :logs, ::File.join(::File.expand_path(::File.dirname(__FILE__)), '/logs')
   set :public_folder, ::File.join(
     ::File.expand_path(::File.dirname(__FILE__)), '/public')
-  set :buffer, 250_000
+  set :buffer, 500_000
 
   helpers do
     def json(code, response)
