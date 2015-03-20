@@ -29,11 +29,14 @@
 
   // Collection VIEW
   LR.Templates.logsSelect = _.template($('#tmplt-LogsSelect').html());
+  LR.Templates.logRenderComplete = _.template($('#tmplt-LogComplete').html());
+  LR.Templates.logRenderPrepend = _.template($('#tmplt-LogPrepend').html());
 
   LR.Views.Logs = Backbone.View.extend({
     el: $('.logs-view'),
-    template: LR.Templates.logsSelect,
-    logLineTemplate: _.template($('#tmplt-LogLinePrepend').html()),
+    selectLog: LR.Templates.logsSelect,
+    logComplete: LR.Templates.logRenderComplete,
+    logPrepend: LR.Templates.logRenderPrepend,
 
     events: {
       'change select': 'changeLog',
@@ -45,7 +48,7 @@
     },
 
     render: function() {
-      this.$el.find('.selectblock').html(this.template({
+      this.$el.find('.selectblock').html(this.selectLog({
         LR: LR,
         collection: this.collection
       }));
@@ -75,6 +78,7 @@
     filterChange: function() {
       LR.filterNewEntry = true;
       LR.functionTimer = 1;
+      $('#table-block').html('');
       $(this.el).removeHighlight();
       LR.activeLogArray = [];
       LR.filterText = this.$el.find('input').val();
@@ -87,33 +91,31 @@
       LR.lineMatchCount = LR.filterArray.length;
     },
 
-    updateFilterArray: function(inputarray, clear) {
-      if (LR.filterText.length === 0) {
-        LR.filterArray = [];
+    updateFilterArray: function(inputarray, filterText) {
+      if (!filterText) {
         return;
       }
-      if (clear) {
-        LR.filterArray = [];
-      }
+      var output = [];
       var idxCount = 0;
       for (var i = 0, y = inputarray.length; i < y; i++) {
         var idx = inputarray[i].line.search(LR.filterText);
         if (idx > -1) {
-          LR.filterArray.push(i);
+          output.push(i);
           idxCount++;
         }
       }
+      console.log('output', output);
+      return output;
     },
 
-    updateActiveArray: function(inputarray, filterarray) {
-      LR.activeLogArray = [];
-      for (var i = 0, y = LR.filterArray.length; i < y; i++) {
+    updateActiveArray: function(sourcearray, filterarray, targetarray) {
+      for (var i = 0, y = filterarray.length; i < y; i++) {
         console.log('pushing filtered lines');
         if (i > 200) {
           return;
         }
-        var filteredLine = inputarray[LR.filterArray[i]];
-        LR.activeLogArray.push(filteredLine);
+        var filteredLine = sourcearray[filterarray[i]];
+        targetarray.push(filteredLine);
       }
     },
 
@@ -121,14 +123,26 @@
        // Add new log entries to the top of our existing array
       LR.newLines = log.get('lines');
       LR.logArray.unshift.apply(LR.logArray, LR.newLines);
-
+      LR.newFilteredLines = [];
       if (LR.newLines.length === 0 && !LR.filterNewEntry) {
         return;
       }
 
       if (LR.filterText) {
-        this.updateFilterArray(LR.logArray, true);
-        this.updateActiveArray(LR.logArray);
+        var filter;
+        if (LR.newLines.length > 0) {
+          console.log('new Filtered lines');
+          filter = this.updateFilterArray(
+            LR.newLines, LR.filterText
+            );
+          this.updateActiveArray(LR.newLines, filter, LR.newFilteredLines);
+        } else {
+          console.log('No new Filtered Lines');
+          filter = this.updateFilterArray(LR.logArray, LR.filterText);
+
+        }
+        console.log(filter);
+        this.updateActiveArray(LR.logArray, filter, LR.activeLogArray);
       } else {
         LR.activeLogArray = LR.logArray.slice(0, 200);
       }
@@ -165,13 +179,40 @@
 
     updateViews: function() {
       // Write the log out to the Dom
-
+      var incomingLinesArray;
       if (LR.newLines.length > 0 || LR.filterNewEntry) {
-        this.$el.find('#table-block').html(
-          this.logLineTemplate({
-            LR: LR,
-            log: LR.activeLogArray
-          }));
+        var logTable = document.getElementById('log-table');
+        if (this.$el.find('#log-table').length > 0) {
+          if(LR.newFilteredLines.length > 0) {
+            console.log('Filtered Lines');
+            incomingLinesArray = LR.newFilteredLines;
+          } else if(!LR.filterText) {
+            incomingLinesArray = LR.newLines;
+          } else {
+            return;
+          }
+          console.log('Prepending', incomingLinesArray);
+          this.$el.find('#log-table').prepend(
+            this.logPrepend({
+              LR: LR,
+              log: incomingLinesArray
+            }));
+
+          while(logTable.rows.length > 200) {
+            // console.log('Deleting Rows');
+            logTable.deleteRow(-1);
+          }
+
+
+        } else {
+          console.log('Log ReWrite');
+          this.$el.find('#table-block').html(
+            this.logComplete({
+              LR: LR,
+              log: LR.activeLogArray
+            }));
+        }
+
         this.$el.find('#headspace').remove();
         this.$el.find('#tailspace').remove();
         this.$el.find('#log-table').prepend(
@@ -213,13 +254,15 @@
         },
         success: _.bind(function() {
           // TODO: protect against race conditions
-
           this.updateArrays(log);
           this.updateOffsets(log);
-          this.updateViews();
+          if (LR.segmentsLeft === 0) {
+            this.updateViews();
+          }
           LR.fetchingLogs = false;
           if (LR.segmentsLeft > 0) {
             // Perform Immediate refresh if there are segments left.
+            this.$el.find("#count").html(LR.segmentsLeft);
             LR.logsView.updateLog();
           }
         }, this)

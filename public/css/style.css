@@ -88,3 +88,26 @@ tr.no {
   text-decoration: underline;
   background-color:yellow;
 }
+
+/* The element to apply the animation to */
+tr {
+    -webkit-animation-name: newline; /* Chrome, Safari, Opera */
+    -webkit-animation-duration: 4s; /* Chrome, Safari, Opera */
+    background-color: white;
+    animation-name: newline;
+    animation-duration: 5s;
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes newline {
+    from {background-color: green;}
+    to {background-color: white;}
+}
+
+/* The animation code */
+@keyframes newline {
+    from {background-color: green;}
+    to {background-color: white;}
+}
+
+

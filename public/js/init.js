@@ -9,6 +9,7 @@
     functionTimer: 0,
     logArray: [],
     filterArray: [],
+    newFilteredLines: [],
     headLogArray: [],
     filterText: '',
     activeLogArray: [],

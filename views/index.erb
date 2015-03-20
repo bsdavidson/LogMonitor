@@ -2,7 +2,7 @@
   <div class="row-fluid">
     <div class="selectblock "></div>
     <div class="logblock">
-      <div id="loader"><img src='/images/ajax-loader.gif' /><p>One Sec...</p></div>
+      <div id="loader"><img src='/images/ajax-loader.gif' /><span id="count"></span><p>One Sec...</p></div>
       <div id="table-block"></div>
     </div>
   </div>
@@ -41,20 +41,29 @@
   </div>
 </script>
 
-<script type="text/template" id="tmplt-LogLinePrepend">
-  <%% var currentLine = LR.lastLineCount + 1 %>
-  <%% var lineState = '' %>
+<script type="text/template" id="tmplt-LogComplete">
     <table class="table"><tbody id="log-table">
     <%% _.each(log, function(line) { %>
       <%% var lineFormatted = $.trim(line['line']) %>
       <%% lineFormatted = LR.escapeHtml(lineFormatted) %>
-      <%% currentLine-- %>
       <tr class="">
         <td><%%= line['lineno'] %></td>
         <td><pre><%%= lineFormatted %></pre></td>
       </tr>
     <%% }) %>
     </tbody></table>
+
+</script>
+
+<script type="text/template" id="tmplt-LogPrepend">
+    <%% _.each(log, function(line) { %>
+      <%% var lineFormatted = $.trim(line['line']) %>
+      <%% lineFormatted = LR.escapeHtml(lineFormatted) %>
+      <tr class="">
+        <td><%%= line['lineno'] %></td>
+        <td><pre><%%= lineFormatted %></pre></td>
+      </tr>
+    <%% }) %>
 </script>
 
 
