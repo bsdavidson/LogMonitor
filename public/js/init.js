@@ -10,6 +10,7 @@ var LR = window.LR = {
   logArray: [],
   filterArray: [],
   headLogArray: [],
+  filterText: '',
   activeLogArray: [],
   newLinesPresent: false,
   segmentsLeft: 0,

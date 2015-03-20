@@ -48,14 +48,8 @@
     <%% _.each(log, function(line) { %>
       <%% var lineFormatted = $.trim(line['line']) %>
       <%% lineFormatted = LR.escapeHtml(lineFormatted) %>
-      <%% if ((LR.lastLineCount - LR.newLineCount) < currentLine - 1) {
-            lineState = 'success'
-          } else {
-            lineState = ''
-          }
-      %>
       <%% currentLine-- %>
-      <tr class="<%%=lineState %>">
+      <tr class="">
         <td><%%= line['lineno'] %></td>
         <td><pre><%%= lineFormatted %></pre></td>
       </tr>
