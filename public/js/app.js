@@ -222,12 +222,19 @@
       LR.pauseRefresh = this.$el.find('#pause-refresh').val();
       LR.lineMatchCount = LR.activeLogArray.length;
 
+      if ($('input#tail-only').is(':checked')) {
+        LR.logTail = true;
+      } else {
+        LR.logTail = false;
+      }
+
       var log = this.collection.get(LR.selectedFile);
       LR.fetchingLogs = true;
       log.fetch({
         data: {
           lastline: LR.lastLineNum,
           seek: LR.lastFilePos,
+          tail: LR.logTail
         },
         success: _.bind(function() {
           // TODO: protect against race conditions

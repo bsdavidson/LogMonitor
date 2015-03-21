@@ -20,6 +20,7 @@
     lastFilePos: 0,
     lineMatchCount: 0,
     fetchingLogs: false,
+    logTail: false,
     Models: {},
     Collections: {},
     Views: {},

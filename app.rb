@@ -10,7 +10,7 @@ class App < Sinatra::Base
   set :logs, ::File.join(::File.expand_path(::File.dirname(__FILE__)), '/logs')
   set :public_folder, ::File.join(
     ::File.expand_path(::File.dirname(__FILE__)), '/public')
-  set :buffer, 1_000_000
+  set :buffer, 500_000
 
   helpers do
     def json(code, response)
@@ -19,7 +19,7 @@ class App < Sinatra::Base
     end
   end
 
-  def get_seek_pos(file, seekpos)
+  def get_seek_pos(file, seekpos, tail = false)
     # New request, get ending position
 
     file.seek(0, IO::SEEK_END)
@@ -28,6 +28,10 @@ class App < Sinatra::Base
 
     if bytes_left > settings.buffer
       segments = (bytes_left / settings.buffer) + 1
+      if tail == true
+        seekpos = endpos - settings.buffer
+        segments = 0
+      end
     else
       segments = 0
     end
@@ -48,18 +52,19 @@ class App < Sinatra::Base
     end
   end
 
-  def log_to_array(filename, lastline = 0, seekpos = 0)
+  def log_to_array(filename, lastline = 0, seekpos = 0, tail = false)
     log_array = []
     last_file_pos = 0
     line_count = lastline
     seek_data = {}
     File.open(File.join(settings.logs, filename), 'r') do |f1|
-      seek_data = get_seek_pos(f1, seekpos)
-      f1.pos = seekpos
+      seek_data = get_seek_pos(f1, seekpos, tail)
+      puts seek_data
+      f1.pos = seek_data[:seekpos]
       bytes_to_read = settings.buffer
       while (line = f1.gets)
-        break if bytes_to_read <= (f1.pos - seekpos)
         last_file_pos = f1.pos
+        break if bytes_to_read <= (f1.pos - seekpos)
         # s = string_status(string, line)
         line_count += 1
         log_array << { lineno: line_count, line: line }
@@ -94,7 +99,12 @@ class App < Sinatra::Base
     file = params[:logfile]
     lastline = params[:lastline].to_i
     seek = params[:seek].to_i
-    output = log_to_array(file, lastline, seek)
+    if params[:tail] == 'true'
+      tail = true
+    else
+      tail = false
+    end
+    output = log_to_array(file, lastline, seek, tail)
     output.to_json
   end
 end
