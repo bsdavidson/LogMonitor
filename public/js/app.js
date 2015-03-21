@@ -21,10 +21,7 @@
   // Collection
   LR.Collections.Logs = Backbone.Collection.extend({
     model: LR.Models.Log,
-    url: '/api/v1/logs',
-    initialize: function() {
-      console.log('Collection Initialized');
-    }
+    url: '/api/v1/logs'
   });
 
   // Collection VIEW
@@ -104,13 +101,11 @@
           idxCount++;
         }
       }
-      console.log('output', output);
       return output;
     },
 
     updateActiveArray: function(sourcearray, filterarray, targetarray) {
       for (var i = 0, y = filterarray.length; i < y; i++) {
-        console.log('pushing filtered lines');
         if (i > 200) {
           return;
         }
@@ -131,13 +126,11 @@
       if (LR.filterText) {
         var filter;
         if (LR.newLines.length > 0) {
-          console.log('new Filtered lines');
           filter = this.updateFilterArray(
             LR.newLines, LR.filterText
             );
           this.updateActiveArray(LR.newLines, filter, LR.newFilteredLines);
         } else {
-          console.log('No new Filtered Lines');
           filter = this.updateFilterArray(LR.logArray, LR.filterText);
         }
         this.updateActiveArray(LR.logArray, filter, LR.activeLogArray);
@@ -174,14 +167,12 @@
         var logTable = document.getElementById('log-table');
         if (this.$el.find('#log-table').length > 0) {
           if (LR.newFilteredLines.length > 0) {
-            console.log('Filtered Lines');
             incomingLinesArray = LR.newFilteredLines;
           } else if (!LR.filterText) {
             incomingLinesArray = LR.newLines;
           } else {
             return;
           }
-          console.log('Prepending', incomingLinesArray);
           this.$el.find('#log-table').prepend(
             this.logPrepend({
               LR: LR,
@@ -189,11 +180,9 @@
             }));
 
           while (logTable.rows.length > 200) {
-            // console.log('Deleting Rows');
             logTable.deleteRow(-1);
           }
         } else {
-          console.log('Log ReWrite');
           this.$el.find('#table-block').html(
             this.logComplete({
               LR: LR,
@@ -213,7 +202,6 @@
       this.$el.find('#loader').hide();
 
       if (LR.filterNewEntry || LR.newLinesPresent) {
-        console.log('updating highlights');
         $(this.el).removeHighlight();
         $('pre').highlight(LR.filterText);
         LR.filterNewEntry = 0;
@@ -227,6 +215,7 @@
       if (LR.fetchingLogs) {
         return;
       }
+
       LR.currentTime = Math.floor(Date.now() / 1000);
       LR.timeElaspsed = LR.currentTime - LR.startTime;
       LR.selectedFile = this.$el.find('select').val();
@@ -242,6 +231,7 @@
         },
         success: _.bind(function() {
           // TODO: protect against race conditions
+
           this.updateArrays(log);
           this.updateOffsets(log);
           if (LR.segmentsLeft === 0) {
@@ -268,7 +258,6 @@
         LR.logsView = new LR.Views.Logs({collection: LR.logs});
         LR.logs.fetch({
           success: function() {
-            console.log(LR.logs.length);
           }
         });
       }

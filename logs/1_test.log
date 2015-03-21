@@ -105,6 +105,5 @@ mica.saglac.qc.ca - - [02/Jul/1995:22:26:03 -0400] "GET /history/apollo/apollo-6
 www-b5.proxy.aol.com - - [02/Jul/1995:22:26:05 -0400] "GET /shuttle/missions/sts-78/sts-78-patch-small.gif HTTP/1.0" 200 4179
 www-b5.proxy.aol.com - - [02/Jul/1995:22:26:05 -0400] "GET /images/launch-logo.gif HTTP/1.0" 200 1713
 alyssa.prodigy.com - - [02/Jul/1995:22:26:06 -0400] "GET /shuttle/countdown/count.gif HTTP/1.0" 200 40310
-mica.saglac.qc.ca - - [02/Jul/1995:22:26:06 -0400] "GET /icons/blank.xbm HTTP/1.0" 304 0
 mica.saglac.qc.ca - - [02/Jul/1995:22:26:06 -0400] "GET /icons/menu.xbm HTTP/1.0" 304 0
 mica.saglac.qc.ca - - [02/Jul/1995:22:26:06 -0400] "GET /icons/image.xbm HTTP/1.0" 304 0
