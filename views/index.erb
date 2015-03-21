@@ -46,7 +46,7 @@
     <%% _.each(log, function(line) { %>
       <%% var lineFormatted = $.trim(line['line']) %>
       <%% lineFormatted = LR.escapeHtml(lineFormatted) %>
-      <tr class="">
+      <tr class="line">
         <td><%%= line['lineno'] %></td>
         <td><pre><%%= lineFormatted %></pre></td>
       </tr>
@@ -59,7 +59,7 @@
     <%% _.each(log, function(line) { %>
       <%% var lineFormatted = $.trim(line['line']) %>
       <%% lineFormatted = LR.escapeHtml(lineFormatted) %>
-      <tr class="">
+      <tr class="line">
         <td><%%= line['lineno'] %></td>
         <td><pre><%%= lineFormatted %></pre></td>
       </tr>

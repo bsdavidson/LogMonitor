@@ -139,9 +139,7 @@
         } else {
           console.log('No new Filtered Lines');
           filter = this.updateFilterArray(LR.logArray, LR.filterText);
-
         }
-        console.log(filter);
         this.updateActiveArray(LR.logArray, filter, LR.activeLogArray);
       } else {
         LR.activeLogArray = LR.logArray.slice(0, 200);
@@ -164,14 +162,6 @@
       }
 
       if (LR.newLinesPresent) {
-        // if less 20 seconds have passed, new lines are added to the
-        // existing new lines. otherwise, the new lines are the only
-        // new line.
-        if ((LR.currentTime - LR.lastNewLineTime) < 20) {
-          LR.newLineCount = LR.newLineCount + (logLen - LR.lastLineCount);
-        } else {
-          LR.newLineCount = logLen - LR.lastLineCount;
-        }
         LR.lastLineCount = logLen;
         LR.lastNewLineTime = LR.currentTime;
       }
@@ -183,10 +173,10 @@
       if (LR.newLines.length > 0 || LR.filterNewEntry) {
         var logTable = document.getElementById('log-table');
         if (this.$el.find('#log-table').length > 0) {
-          if(LR.newFilteredLines.length > 0) {
+          if (LR.newFilteredLines.length > 0) {
             console.log('Filtered Lines');
             incomingLinesArray = LR.newFilteredLines;
-          } else if(!LR.filterText) {
+          } else if (!LR.filterText) {
             incomingLinesArray = LR.newLines;
           } else {
             return;
@@ -198,12 +188,10 @@
               log: incomingLinesArray
             }));
 
-          while(logTable.rows.length > 200) {
+          while (logTable.rows.length > 200) {
             // console.log('Deleting Rows');
             logTable.deleteRow(-1);
           }
-
-
         } else {
           console.log('Log ReWrite');
           this.$el.find('#table-block').html(
@@ -243,7 +231,7 @@
       LR.timeElaspsed = LR.currentTime - LR.startTime;
       LR.selectedFile = this.$el.find('select').val();
       LR.pauseRefresh = this.$el.find('#pause-refresh').val();
-      LR.lineMatchCount = LR.filterArray.length;
+      LR.lineMatchCount = LR.activeLogArray.length;
 
       var log = this.collection.get(LR.selectedFile);
       LR.fetchingLogs = true;
@@ -262,7 +250,7 @@
           LR.fetchingLogs = false;
           if (LR.segmentsLeft > 0) {
             // Perform Immediate refresh if there are segments left.
-            this.$el.find("#count").html(LR.segmentsLeft);
+            this.$el.find('#count').html(LR.segmentsLeft);
             LR.logsView.updateLog();
           }
         }, this)

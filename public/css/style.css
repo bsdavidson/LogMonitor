@@ -90,23 +90,25 @@ tr.no {
 }
 
 /* The element to apply the animation to */
-tr {
+tr.line {
     -webkit-animation-name: newline; /* Chrome, Safari, Opera */
-    -webkit-animation-duration: 4s; /* Chrome, Safari, Opera */
+    -webkit-animation-duration: 10s; /* Chrome, Safari, Opera */
+    -moz-animation-name: newline; /* Chrome, Safari, Opera */
+    -moz-animation-duration: 10s; /* Chrome, Safari, Opera */
     background-color: white;
     animation-name: newline;
-    animation-duration: 5s;
+    animation-duration: 10s;
 }
 
 /* Chrome, Safari, Opera */
 @-webkit-keyframes newline {
-    from {background-color: green;}
+    from {background-color: #83CC87;}
     to {background-color: white;}
 }
 
 /* The animation code */
 @keyframes newline {
-    from {background-color: green;}
+    from {background-color: #83CC87;}
     to {background-color: white;}
 }
 
