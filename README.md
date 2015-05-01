@@ -1,4 +1,7 @@
 # logreader
+
+![screenshot](https://raw.githubusercontent.com/bsdavidson/logreader/master/screenshots/Screenshot%201.png)
+
 For monitoring log files that are typically symlinked into the logs directory.
 
 This project was built using Ruby, Backbone, and JS.
@@ -13,8 +16,20 @@ You can use the "Tail Only" checkbox to prevent the app from backloading the who
 
 # What does this do?
 
-By adding symlinked files into the logs directory (these can be from the local system or remotely mounted filesystems), 
-it will attempt to load the file (in segments to prevent giant queries) and give you a live readout. This log can be filtered (much like using grep) using simple exact phrasing.  
+By adding symlinked files into the logs directory (these can be from the local system or remotely mounted filesystems),
+it will attempt to load the file (in segments to prevent giant queries) and give you a live readout. This log can be filtered (much like using grep) using simple exact phrasing.
 
-New entires appear green and fade to white.  
+New entires appear green and fade to white.
+
+
+#HOW TO INSTALL
+
+- Clone the repo into a local directory
+  git clone https://github.com/bsdavidson/logreader.git
+
+- Install dependencies
+  bundle install
+
+- run
+  rake watch
 
