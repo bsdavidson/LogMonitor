@@ -33,7 +33,7 @@ New entires appear green and fade to white.
         bundle install
         npm install
 
-- run
+- Run
 
         rake watch
         
