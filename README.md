@@ -1,4 +1,4 @@
-# LogMonitor
+# Log Monitor
 
 ![screenshot](https://raw.githubusercontent.com/bsdavidson/logreader/master/screenshots/Screenshot%201.png)
 
