@@ -36,4 +36,9 @@ New entires appear green and fade to white.
 - run
 
         rake watch
+        
+- Connect
+
+        Open your browser to http://localhost:9292
+
 
