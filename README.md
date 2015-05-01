@@ -8,7 +8,7 @@ This project was built using Ruby, Backbone, and JS.
 
 It is still a work in progress and as such, it has bugs.
 
-It should work fine for most log files, though, since I don't have a limit set yet, it will happliy try and load VERY large log
+It should work fine for most log files, though, since I don't have a limit set yet, it will happily try and load VERY large log
 files until it crashses.
 
 You can use the "Tail Only" checkbox to prevent the app from backloading the whole log file.
@@ -26,7 +26,7 @@ New entires appear green and fade to white.
 
 - Clone the repo into a local directory
 
-        git clone https://github.com/bsdavidson/logreader.git
+        git clone https://github.com/bsdavidson/LogMonitor.git
 
 - Install dependencies
 
