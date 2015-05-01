@@ -46,4 +46,5 @@ New entires appear green and fade to white.
 - Add Log files to monitor
 
 Use a symlink to add entries in the 'logs' directory for them to appear as a dropdown in the web interface. 
+        
         ex: ln -s /var/log/messages logs/messages
