@@ -30,10 +30,10 @@ New entires appear green and fade to white.
 
 - Install dependencies
 
-    - bundle install
-    - npm install
+        bundle install
+        npm install
 
 - run
 
-    rake watch
+        rake watch
 
