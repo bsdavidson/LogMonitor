@@ -25,12 +25,15 @@ New entires appear green and fade to white.
 #HOW TO INSTALL
 
 - Clone the repo into a local directory
-    git clone https://github.com/bsdavidson/logreader.git
+
+        git clone https://github.com/bsdavidson/logreader.git
 
 - Install dependencies
+
     bundle install
     npm install
 
 - run
+
     rake watch
 
