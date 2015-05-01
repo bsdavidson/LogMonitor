@@ -115,7 +115,7 @@
     },
 
     updateArrays: function(log) {
-       // Add new log entries to the top of our existing array
+      // Add new log entries to the top of our existing array
       LR.newLines = log.get('lines');
       LR.logArray.unshift.apply(LR.logArray, LR.newLines);
       LR.newFilteredLines = [];
@@ -255,20 +255,20 @@
     }
   });
 
-// Router
+  // Router
   LR.Router = Backbone.Router.extend({
     routes: {
-        '': 'defaultRoute'
-      },
-      defaultRoute: function() {
-        LR.logs = new LR.Collections.Logs();
-        LR.logsView = new LR.Views.Logs({collection: LR.logs});
-        LR.logs.fetch({
-          success: function() {
-          }
-        });
-      }
-    });
+      '' : 'defaultRoute'
+    },
+    defaultRoute: function() {
+      LR.logs = new LR.Collections.Logs();
+      LR.logsView = new LR.Views.Logs({collection: LR.logs});
+      LR.logs.fetch({
+        success: function() {
+        }
+      });
+    }
+  });
 
   var appRouter = new LR.Router();
   Backbone.history.start();

@@ -1,0 +1,21 @@
+Read in the entire log
+
+
+log_output = [
+  {
+    "stats": [
+      { total_lines: 6, lines_with_string: 10,
+        other_stat: 20
+      }
+    ],
+    "log_file": [
+    "Feb  8 13:42:58 Brians-Macbook.local discoveryd[49969]: Basic Bonjour Failed to delete registration recordId=27 error=4\n",
+    "Feb  8 13:45:18 Brians-Macbook.local Google Chrome Helper[32382]: CoreText CopyFontsForRequest received mig IPC error (FFFFFFFFFFFFFECC) from font server\n",
+    "Feb  8 13:45:18 Brians-Macbook.local Google Chrome Helper[32381]: CoreText CopyFontsForRequest received mig IPC error (FFFFFFFFFFFFFECC) from font server\n",
+    "Feb  8 15:59:15 Brians-Macbook.local Google Chrome Helper[4924]: CoreText CopyFontsForRequest received mig IPC error (FFFFFFFFFFFFFECC) from font server\n",
+    "Feb  8 21:11:15 Brians-Macbook.local Google Chrome Helper[3139]: CoreText CopyFontsForRequest received mig IPC error (FFFFFFFFFFFFFECC) from font server\n",
+    "Feb  8 21:13:38 Brians-Macbook.local Google Chrome Helper[3139]: CoreText CopyFontsForRequest received mig IPC error (FFFFFFFFFFFFFECC) from font server\n"
+    ]
+
+}
+]

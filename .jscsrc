@@ -1,0 +1,8 @@
+{
+  "preset": "google",
+  "disallowPaddingNewlinesInBlocks": true,
+  "disallowEmptyBlocks": true,
+  "excludeFiles": [
+    "js/**"
+  ]
+}
