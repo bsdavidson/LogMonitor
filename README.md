@@ -11,3 +11,10 @@ files until it crashses.
 You can use the "Tail Only" checkbox to prevent the app from backloading the whole log file.
 
 
+# What does this do?
+
+By adding symlinked files into the logs directory (these can be from the local system or remotely mounted filesystems), 
+it will attempt to load the file (in segments to prevent giant queries) and give you a live readout. This log can be filtered (much like using grep) using simple exact phrasing.  
+
+New entires appear green and fade to white.  
+
